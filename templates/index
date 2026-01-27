@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StakeClone - Casino</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
+                        <rect width="40" height="40" rx="8" fill="url(#logo-gradient)"/>
+                        <path d="M12 20L18 14L24 20L30 14" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12 26L18 20L24 26L30 20" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                        <defs>
+                            <linearGradient id="logo-gradient" x1="0" y1="0" x2="40" y2="40">
+                                <stop stop-color="#00D9A3"/>
+                                <stop offset="1" stop-color="#00B386"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <span>StakeClone</span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <h3>Mes jeux</h3>
+                    <button class="nav-item active" data-game="plinko">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                            <circle cx="10" cy="3" r="2"/>
+                            <circle cx="10" cy="17" r="2"/>
+                            <circle cx="5" cy="10" r="1.5"/>
+                            <circle cx="15" cy="10" r="1.5"/>
+                            <circle cx="7.5" cy="6.5" r="1.5"/>
+                            <circle cx="12.5" cy="6.5" r="1.5"/>
+                            <circle cx="7.5" cy="13.5" r="1.5"/>
+                            <circle cx="12.5" cy="13.5" r="1.5"/>
+                        </svg>
+                        <span>Plinko</span>
+                    </button>
+                    
+                    <button class="nav-item" data-game="crash">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M2 18L8 10L12 14L18 2" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+                            <path d="M18 8V2H12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+                        </svg>
+                        <span>Crash</span>
+                    </button>
+                    
+                    <button class="nav-item" data-game="dice">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="2" width="16" height="16" rx="3"/>
+                            <circle cx="10" cy="10" r="1.5" fill="currentColor"/>
+                        </svg>
+                        <span>Dice</span>
+                    </button>
+                    
+                    <button class="nav-item" data-game="mines">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10 2L11 6H15L12 9L13 13L10 11L7 13L8 9L5 6H9L10 2Z"/>
+                        </svg>
+                        <span>Mines</span>
+                    </button>
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-balance">
+                    <span class="balance-label">Solde</span>
+                    <span class="balance-amount" id="balance">0.00€</span>
+                </div>
+                <button class="btn-logout" onclick="window.location.href='/logout'">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M6 2H3C2.44772 2 2 2.44772 2 3V13C2 13.5523 2.44772 14 3 14H6M10 11L14 8M14 8L10 5M14 8H6"/>
+                    </svg>
+                    Déconnexion
+                </button>
+            </div>
+        </aside>
+        
+        <!-- Main content -->
+        <main class="main-content">
+            <div id="game-container">
+                <!-- Games will be loaded here -->
+            </div>
+            
+            <div class="history-panel">
+                <h3>Historique récent</h3>
+                <div class="history-list" id="history-list">
+                    <div class="history-empty">Aucune partie jouée</div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/plinko.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/crash.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dice.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/mines.js') }}"></script>
+</body>
+</html>
