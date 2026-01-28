@@ -129,6 +129,26 @@ function loadGame(game) {
             container.innerHTML = getMinesHTML();
             initMines();
             break;
+        case 'chicken':
+            container.innerHTML = getChickenHTML();
+            initChicken();
+            break;
+        case 'pump':
+            container.innerHTML = getPumpHTML();
+            initPump();
+            break;
+        case 'roulette':
+            container.innerHTML = getRouletteHTML();
+            initRoulette();
+            break;
+        case 'blackjack':
+            container.innerHTML = getBlackJackHTML();
+            initBlackJack();
+            break;
+        case 'limbo':
+            container.innerHTML = getLimboHTML();
+            initLimbo();
+            break;
     }
 }
 
