@@ -15,11 +15,25 @@ document.addEventListener('DOMContentLoaded', () => {
 async function loadBalance() {
     try {
         const response = await fetch('/api/balance');
+        if (response.status === 401) {
+            // Not authenticated, redirect to login
+            window.location.href = '/login';
+            return;
+        }
         const data = await response.json();
+        if (data.error) {
+            console.error('Balance error:', data.error);
+            window.location.href = '/login';
+            return;
+        }
         currentBalance = data.balance;
         updateBalanceDisplay();
     } catch (error) {
         console.error('Error loading balance:', error);
+        // On error, try to redirect to login
+        setTimeout(() => {
+            window.location.href = '/login';
+        }, 1000);
     }
 }
 
@@ -39,7 +53,14 @@ function updateBalanceDisplay() {
 async function loadHistory() {
     try {
         const response = await fetch('/api/history');
+        if (response.status === 401) {
+            return; // User not authenticated, will be redirected by loadBalance
+        }
         const data = await response.json();
+        if (data.error) {
+            console.error('History error:', data.error);
+            return;
+        }
         
         const historyList = document.getElementById('history-list');
         
