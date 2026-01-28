@@ -39,6 +39,12 @@ class Transaction(db.Model):
 with app.app_context():
     db.create_all()
 
+# Helper function to get authenticated user
+def get_current_user():
+    if 'user_id' not in session:
+        return None
+    return User.query.get(session['user_id'])
+
 # Routes
 @app.route('/')
 def index():
@@ -91,12 +97,21 @@ def get_balance():
         return jsonify({'error': 'Not authenticated'}), 401
     
     user = User.query.get(session['user_id'])
+    if not user:
+        session.clear()
+        return jsonify({'error': 'User not found'}), 401
+    
     return jsonify({'balance': user.balance})
 
 @app.route('/api/history')
 def get_history():
     if 'user_id' not in session:
         return jsonify({'error': 'Not authenticated'}), 401
+    
+    user = User.query.get(session['user_id'])
+    if not user:
+        session.clear()
+        return jsonify({'error': 'User not found'}), 401
     
     transactions = Transaction.query.filter_by(user_id=session['user_id'])\
         .order_by(Transaction.created_at.desc()).limit(50).all()
@@ -113,14 +128,13 @@ def get_history():
 # Game: Plinko
 @app.route('/api/play/plinko', methods=['POST'])
 def play_plinko():
-    if 'user_id' not in session:
+    user = get_current_user()
+    if not user:
         return jsonify({'error': 'Not authenticated'}), 401
     
     data = request.json
     bet_amount = float(data['bet'])
     risk_level = data.get('risk', 'medium')
-    
-    user = User.query.get(session['user_id'])
     
     if user.balance < bet_amount:
         return jsonify({'error': 'Insufficient balance'}), 400
@@ -168,14 +182,13 @@ def play_plinko():
 # Game: Crash
 @app.route('/api/play/crash', methods=['POST'])
 def play_crash():
-    if 'user_id' not in session:
+    user = get_current_user()
+    if not user:
         return jsonify({'error': 'Not authenticated'}), 401
     
     data = request.json
     bet_amount = float(data['bet'])
     cashout_multiplier = float(data.get('autoCashout', 2.0))
-    
-    user = User.query.get(session['user_id'])
     
     if user.balance < bet_amount:
         return jsonify({'error': 'Insufficient balance'}), 400
@@ -234,15 +247,14 @@ def play_crash():
 # Game: Dice
 @app.route('/api/play/dice', methods=['POST'])
 def play_dice():
-    if 'user_id' not in session:
+    user = get_current_user()
+    if not user:
         return jsonify({'error': 'Not authenticated'}), 401
     
     data = request.json
     bet_amount = float(data['bet'])
     target = float(data['target'])
     over = data.get('over', True)
-    
-    user = User.query.get(session['user_id'])
     
     if user.balance < bet_amount:
         return jsonify({'error': 'Insufficient balance'}), 400
@@ -292,7 +304,8 @@ def play_dice():
 # Game: Mines
 @app.route('/api/play/mines', methods=['POST'])
 def play_mines():
-    if 'user_id' not in session:
+    user = get_current_user()
+    if not user:
         return jsonify({'error': 'Not authenticated'}), 401
     
     data = request.json
@@ -301,8 +314,6 @@ def play_mines():
     if action == 'start':
         bet_amount = float(data['bet'])
         num_mines = int(data.get('mines', 3))
-        
-        user = User.query.get(session['user_id'])
         
         if user.balance < bet_amount:
             return jsonify({'error': 'Insufficient balance'}), 400
@@ -337,7 +348,9 @@ def play_mines():
         
         if position in game['mines']:
             # Hit a mine - game over
-            user = User.query.get(session['user_id'])
+            user = get_current_user()
+            if not user:
+                return jsonify({'error': 'Not authenticated'}), 401
             
             transaction = Transaction(
                 user_id=user.id,
@@ -382,6 +395,10 @@ def play_mines():
         if 'mines_game' not in session:
             return jsonify({'error': 'No active game'}), 400
         
+        user = get_current_user()
+        if not user:
+            return jsonify({'error': 'Not authenticated'}), 401
+        
         game = session['mines_game']
         gems_found = len(game['revealed'])
         
@@ -394,7 +411,6 @@ def play_mines():
         
         win_amount = game['bet'] * multiplier
         
-        user = User.query.get(session['user_id'])
         user.balance += win_amount
         
         transaction = Transaction(
