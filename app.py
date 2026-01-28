@@ -47,6 +47,10 @@ def get_current_user():
 
 # Routes
 @app.route('/')
+def home():
+    return render_template('home.html')
+
+@app.route('/casino')
 def index():
     if 'user_id' not in session:
         return redirect(url_for('login'))
@@ -61,7 +65,7 @@ def login():
         if user and user.check_password(data['password']):
             session['user_id'] = user.id
             session['username'] = user.username
-            return jsonify({'success': True, 'balance': user.balance})
+            return jsonify({'success': True, 'balance': user.balance, 'redirect': '/casino'})
         
         return jsonify({'success': False, 'message': 'Invalid credentials'}), 401
     
@@ -84,7 +88,7 @@ def register():
     session['user_id'] = user.id
     session['username'] = user.username
     
-    return jsonify({'success': True, 'balance': user.balance})
+    return jsonify({'success': True, 'balance': user.balance, 'redirect': '/casino'})
 
 @app.route('/logout')
 def logout():
