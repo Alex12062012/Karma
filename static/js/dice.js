@@ -20,7 +20,7 @@ function getDiceHTML() {
                         </div>
                         
                         <input type="range" id="dice-target" min="1" max="99" value="50" step="0.01" 
-                            style="width: 100%; height: 8px; border-radius: 4px; background: linear-gradient(to right, var(--accent-red) 0%, var(--accent-green) 100%); cursor: pointer; -webkit-appearance: none; appearance: none;">
+                            style="width: 100%; height: 8px; border-radius: 4px; background: linear-gradient(to right, var(--accent-green) 0%, var(--accent-red) 100%); cursor: pointer; -webkit-appearance: none; appearance: none;">
                         
                         <div style="display: flex; justify-content: space-between; margin-top: 24px; gap: 12px;">
                             <div style="flex: 1; padding: 16px; background: var(--bg-primary); border-radius: 8px; text-align: center;">
@@ -99,6 +99,9 @@ function initDice() {
 
 function updateDiceStats() {
     const target = parseFloat(document.getElementById('dice-target').value);
+    // When diceOver is true (Roll Over): win if roll > target
+    // When diceOver is false (Roll Under): win if roll < target
+    // So moving right = higher target = harder to roll over = lower win chance
     const winChance = diceOver ? (100 - target) : target;
     const multiplier = winChance > 0 ? (98 / winChance) : 0;
     
