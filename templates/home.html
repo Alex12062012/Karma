@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Karma - Casino en ligne</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0a0f;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 40px 20px;
+        }
+
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .orb-1 {
+            width: 500px;
+            height: 500px;
+            background: linear-gradient(135deg, #9333EA, #EC4899);
+            top: -200px;
+            left: -200px;
+            animation-delay: 0s;
+        }
+
+        .orb-2 {
+            width: 600px;
+            height: 600px;
+            background: linear-gradient(135deg, #EC4899, #F59E0B);
+            bottom: -300px;
+            right: -300px;
+            animation-delay: 5s;
+        }
+
+        .orb-3 {
+            width: 400px;
+            height: 400px;
+            background: linear-gradient(135deg, #F59E0B, #9333EA);
+            top: 50%;
+            left: 50%;
+            animation-delay: 10s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(50px, -50px) scale(1.1); }
+            66% { transform: translate(-30px, 30px) scale(0.9); }
+        }
+
+        .content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            max-width: 900px;
+        }
+
+        .logo-big {
+            margin-bottom: 40px;
+            animation: fadeInDown 1s ease;
+        }
+
+        .logo-big svg {
+            width: 120px;
+            height: 120px;
+            filter: drop-shadow(0 20px 40px rgba(147, 51, 234, 0.5));
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            font-size: 72px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #9333EA, #EC4899, #F59E0B);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            animation: fadeInUp 1s ease 0.2s both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .tagline {
+            font-size: 24px;
+            color: #b1bad3;
+            margin-bottom: 50px;
+            animation: fadeInUp 1s ease 0.4s both;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeInUp 1s ease 0.6s both;
+        }
+
+        .btn {
+            padding: 18px 40px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #9333EA, #EC4899);
+            color: white;
+            box-shadow: 0 10px 30px rgba(147, 51, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(147, 51, 234, 0.6);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .features {
+            position: relative;
+            z-index: 10;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-top: 100px;
+            max-width: 1200px;
+            padding: 0 20px;
+            animation: fadeInUp 1s ease 0.8s both;
+        }
+
+        .feature {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .feature:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(147, 51, 234, 0.5);
+        }
+
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .feature h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #9333EA, #EC4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .feature p {
+            color: #b1bad3;
+            line-height: 1.6;
+        }
+
+        .stats {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            gap: 60px;
+            justify-content: center;
+            margin-top: 80px;
+            flex-wrap: wrap;
+            animation: fadeInUp 1s ease 1s both;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 48px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #9333EA, #EC4899, #F59E0B);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            color: #b1bad3;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 48px;
+            }
+
+            .tagline {
+                font-size: 18px;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="animated-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="hero">
+        <div class="content">
+            <div class="logo-big">
+                <svg width="120" height="120" viewBox="0 0 40 40" fill="none">
+                    <circle cx="20" cy="20" r="18" fill="url(#karma-gradient-home)" opacity="0.2"/>
+                    <path d="M20 4C20 4 12 12 12 20C12 24 14 28 20 28C26 28 28 24 28 20C28 12 20 4 20 4Z" fill="url(#karma-gradient-home)"/>
+                    <circle cx="20" cy="16" r="3" fill="white"/>
+                    <path d="M16 22C16 22 18 24 20 24C22 24 24 22 24 22" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                    <defs>
+                        <linearGradient id="karma-gradient-home" x1="20" y1="4" x2="20" y2="36" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#9333EA"/>
+                            <stop offset="0.5" stop-color="#EC4899"/>
+                            <stop offset="1" stop-color="#F59E0B"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+
+            <h1>Karma</h1>
+            <p class="tagline">L'expérience casino ultime. Jouez, gagnez, répétez.</p>
+
+            <div class="cta-buttons">
+                <a href="/login" class="btn btn-primary">Commencer à jouer</a>
+                <a href="#features" class="btn btn-secondary">Découvrir les jeux</a>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-number">8</div>
+                <div class="stat-label">Jeux disponibles</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">1000€</div>
+                <div class="stat-label">Bonus de départ</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">24/7</div>
+                <div class="stat-label">Disponible</div>
+            </div>
+        </div>
+
+        <div id="features" class="features">
+            <div class="feature">
+                <div class="feature-icon">🎯</div>
+                <h3>Plinko</h3>
+                <p>Laissez tomber la balle à travers la pyramide de piquets et tentez de décrocher les meilleurs multiplicateurs.</p>
+            </div>
+
+            <div class="feature">
+                <div class="feature-icon">📈</div>
+                <h3>Crash</h3>
+                <p>Le multiplicateur monte... jusqu'au crash ! Encaissez au bon moment pour maximiser vos gains.</p>
+            </div>
+
+            <div class="feature">
+                <div class="feature-icon">🎲</div>
+                <h3>Dice</h3>
+                <p>Un jeu simple mais addictif. Prédisez si le dé sera au-dessus ou en-dessous de votre cible.</p>
+            </div>
+
+            <div class="feature">
+                <div class="feature-icon">💎</div>
+                <h3>Mines</h3>
+                <p>Révélez les gemmes, évitez les mines. Plus vous révélez, plus le multiplicateur augmente !</p>
+            </div>
+
+            <div class="feature">
+                <div class="feature-icon">🐔</div>
+                <h3>Chicken</h3>
+                <p>Trouvez les os sans tomber sur les renards. Un jeu de chance et de stratégie.</p>
+            </div>
+
+            <div class="feature">
+                <div class="feature-icon">💰</div>
+                <h3>Pump</h3>
+                <p>Le multiplicateur gonfle ! Cliquez pour encaisser avant qu'il n'explose.</p>
+            </div>
+
+            <div class="feature">
+                <div class="feature-icon">🎰</div>
+                <h3>Roulette</h3>
+                <p>Le grand classique ! Rouge ou noir, pair ou impair, tentez votre chance sur la roue.</p>
+            </div>
+
+            <div class="feature">
+                <div class="feature-icon">🃏</div>
+                <h3>BlackJack</h3>
+                <p>Battez le croupier en vous approchant de 21 sans le dépasser. Le classique des casinos.</p>
+            </div>
+
+            <div class="feature">
+                <div class="feature-icon">🚀</div>
+                <h3>Limbo</h3>
+                <p>Choisissez votre multiplicateur cible. Plus c'est haut, plus c'est risqué, plus vous gagnez !</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
