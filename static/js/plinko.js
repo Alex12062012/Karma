@@ -85,19 +85,24 @@ function drawPlinkoBoard() {
     plinkoCtx.fillStyle = '#0f1923';
     plinkoCtx.fillRect(0, 0, width, height);
     
-    // Draw pegs (16 rows)
+    // Draw pegs (16 rows) - PYRAMID SHAPE
     const rows = 16;
     const startY = 80;
     const rowSpacing = 35;
     const pegRadius = 4;
+    const maxWidth = 500; // Maximum width of pyramid
     
     for (let row = 0; row < rows; row++) {
         const pegsInRow = row + 3;
         const y = startY + row * rowSpacing;
-        const spacing = width / (pegsInRow + 1);
         
-        for (let i = 1; i <= pegsInRow; i++) {
-            const x = spacing * i;
+        // Center the pegs and create pyramid shape
+        const rowWidth = (maxWidth / rows) * (row + 1);
+        const spacing = rowWidth / (pegsInRow - 1);
+        const startX = (width - rowWidth) / 2;
+        
+        for (let i = 0; i < pegsInRow; i++) {
+            const x = startX + spacing * i;
             
             // Peg glow
             const gradient = plinkoCtx.createRadialGradient(x, y, 0, x, y, pegRadius * 3);
@@ -199,10 +204,13 @@ async function animatePlinko(path, multiplier) {
         const rows = 16;
         const startY = 40;
         const rowSpacing = 35;
+        const maxWidth = 500;
         
         let currentRow = 0;
         let currentX = width / 2;
         let currentY = startY;
+        let velocityX = 0;
+        let velocityY = 0;
         
         const animate = () => {
             if (currentRow >= rows) {
@@ -214,15 +222,16 @@ async function animatePlinko(path, multiplier) {
                 const bucketY = height - 60;
                 
                 // Animate to bucket
-                const steps = 20;
+                const steps = 30;
                 let step = 0;
                 
                 const toBucket = setInterval(() => {
                     drawPlinkoBoard();
                     
                     const progress = step / steps;
-                    const x = currentX + (finalX - currentX) * progress;
-                    const y = currentY + (bucketY - currentY) * progress;
+                    const easeProgress = 1 - Math.pow(1 - progress, 3); // Ease out cubic
+                    const x = currentX + (finalX - currentX) * easeProgress;
+                    const y = currentY + (bucketY - currentY) * easeProgress;
                     
                     // Ball glow
                     const gradient = plinkoCtx.createRadialGradient(x, y, 0, x, y, ballRadius * 2);
@@ -245,38 +254,49 @@ async function animatePlinko(path, multiplier) {
                         clearInterval(toBucket);
                         
                         // Flash bucket
+                        let flashCount = 0;
                         const bucketFlash = setInterval(() => {
                             drawPlinkoBoard();
                             
-                            plinkoCtx.fillStyle = 'rgba(251, 191, 36, 0.3)';
-                            plinkoCtx.fillRect(finalPosition * bucketWidth, height - 60, bucketWidth, 50);
+                            if (flashCount % 2 === 0) {
+                                plinkoCtx.fillStyle = 'rgba(251, 191, 36, 0.3)';
+                                plinkoCtx.fillRect(finalPosition * bucketWidth, height - 60, bucketWidth, 50);
+                            }
                             
                             plinkoCtx.fillStyle = '#fbbf24';
                             plinkoCtx.font = 'bold 24px Inter';
                             plinkoCtx.textAlign = 'center';
                             plinkoCtx.fillText(`${multiplier}x`, finalX, height - 30);
-                        }, 100);
-                        
-                        setTimeout(() => {
-                            clearInterval(bucketFlash);
-                            drawPlinkoBoard();
-                            resolve();
-                        }, 1000);
+                            
+                            flashCount++;
+                            if (flashCount >= 6) {
+                                clearInterval(bucketFlash);
+                                drawPlinkoBoard();
+                                resolve();
+                            }
+                        }, 150);
                     }
-                }, 20);
+                }, 16);
                 
                 return;
             }
             
             const position = path[currentRow];
             const pegsInRow = currentRow + 3;
-            const spacing = width / (pegsInRow + 1);
-            const targetX = spacing * (position + 1.5 - Math.floor(pegsInRow / 2));
+            const rowWidth = (maxWidth / rows) * (currentRow + 1);
+            const spacing = rowWidth / (pegsInRow - 1);
+            const startX = (width - rowWidth) / 2;
+            const targetX = startX + spacing * position;
             const targetY = startY + currentRow * rowSpacing;
             
-            // Smooth movement
-            currentX += (targetX - currentX) * 0.3;
-            currentY += (targetY - currentY) * 0.3;
+            // Physics-based movement
+            velocityX += (targetX - currentX) * 0.15;
+            velocityY += (targetY - currentY) * 0.15;
+            velocityX *= 0.85; // Damping
+            velocityY *= 0.85;
+            
+            currentX += velocityX;
+            currentY += velocityY;
             
             drawPlinkoBoard();
             
@@ -295,7 +315,8 @@ async function animatePlinko(path, multiplier) {
             plinkoCtx.arc(currentX, currentY, ballRadius, 0, Math.PI * 2);
             plinkoCtx.fill();
             
-            if (Math.abs(currentY - targetY) < 1) {
+            // Move to next row when close enough
+            if (Math.abs(currentY - targetY) < 5 && Math.abs(velocityY) < 2) {
                 currentRow++;
             }
             
