@@ -148,7 +148,7 @@ async function playCrash() {
         
         if (data.won) {
             const profit = data.win - bet;
-            showNotification(`Encaissé à ${data.multiplier.toFixed(2)}x ! +${formatMoney(profit)}`, 'success');
+            showNotification(`Encaissé à ${data.multiplier.toFixed(2)}x ! Gain : ${formatMoney(data.win)} (+${formatMoney(profit)})`, 'success');
         } else {
             showNotification(`Crashed à ${data.crashPoint.toFixed(2)}x !`, 'error');
         }
