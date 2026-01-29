@@ -170,8 +170,8 @@ function popBalloon(balloon, svg) {
     balloon.style.transform = 'scale(0)';
     balloon.style.opacity = '0';
     
-    document.getElementById('pump-message').innerHTML = '💥 <span style="color: var(--accent-red); font-weight: 700;">EXPLOSION !</span>';
-    document.getElementById('pump-message').style.fontSize = '24px';
+    document.getElementById('pump-message').innerHTML = `💥 <span style="color: var(--accent-red); font-weight: 700;">EXPLOSION à ${pumpMaxMultiplier.toFixed(2)}x !</span>`;
+    document.getElementById('pump-message').style.fontSize = '20px';
     
     setTimeout(async () => {
         try {
@@ -186,7 +186,7 @@ function popBalloon(balloon, svg) {
             updateBalanceDisplay();
             loadHistory();
             
-            showNotification('Le ballon a explosé !', 'error');
+            showNotification(`Le ballon a explosé à ${pumpMaxMultiplier.toFixed(2)}x !`, 'error');
             
             setTimeout(() => resetPump(), 2000);
             
