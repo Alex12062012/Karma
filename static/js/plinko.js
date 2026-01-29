@@ -208,175 +208,138 @@ async function animatePlinko(path, multiplier) {
         const height = plinkoCanvas.height;
         const ballRadius = 10;
         const rows = 16;
-        const startY = 40;
+        const startY = 60;
         const rowSpacing = 35;
         const maxWidth = 500;
         const minPegSpacing = ballRadius * 3;
         
-        // Physique
-        const gravity = 0.4;
-        const restitution = 0.7; // Coefficient de rebond
-        const friction = 0.98;
-        
+        let currentRow = 0;
         let ball = {
             x: width / 2,
-            y: startY,
-            vx: 0,
-            vy: 0
+            y: startY
         };
         
-        let currentRow = 0;
-        let targetPegIndex = 0;
-        
-        const animate = () => {
+        const animateToRow = () => {
             if (currentRow >= rows) {
-                // Ball reached bottom - animate to bucket
+                // Animation vers le bucket final
                 const buckets = 13;
                 const bucketWidth = width / buckets;
                 const finalPosition = path[path.length - 1];
                 const finalX = (finalPosition + 0.5) * bucketWidth;
                 const bucketY = height - 60;
                 
-                // Continue avec gravité jusqu'au bucket
-                ball.vy += gravity;
-                ball.y += ball.vy;
-                ball.x += ball.vx;
-                ball.vx *= friction;
+                let step = 0;
+                const steps = 30;
+                const startX = ball.x;
+                const startY = ball.y;
                 
-                // Collision avec le bucket
-                if (ball.y >= bucketY) {
-                    ball.y = bucketY;
-                    ball.vy = 0;
+                const moveToFinal = () => {
+                    step++;
+                    const progress = step / steps;
+                    const easeProgress = 1 - Math.pow(1 - progress, 2);
                     
-                    // Déplacer vers le centre du bucket
-                    const dx = finalX - ball.x;
-                    if (Math.abs(dx) > 1) {
-                        ball.x += dx * 0.1;
-                    }
-                }
-                
-                drawPlinkoBoard();
-                
-                // Ball glow
-                const gradient = plinkoCtx.createRadialGradient(ball.x, ball.y, 0, ball.x, ball.y, ballRadius * 2);
-                gradient.addColorStop(0, 'rgba(251, 191, 36, 0.9)');
-                gradient.addColorStop(1, 'rgba(251, 191, 36, 0)');
-                plinkoCtx.fillStyle = gradient;
-                plinkoCtx.beginPath();
-                plinkoCtx.arc(ball.x, ball.y, ballRadius * 2, 0, Math.PI * 2);
-                plinkoCtx.fill();
-                
-                // Ball avec ombre
-                plinkoCtx.shadowColor = 'rgba(251, 191, 36, 0.8)';
-                plinkoCtx.shadowBlur = 15;
-                plinkoCtx.fillStyle = '#fbbf24';
-                plinkoCtx.beginPath();
-                plinkoCtx.arc(ball.x, ball.y, ballRadius, 0, Math.PI * 2);
-                plinkoCtx.fill();
-                plinkoCtx.shadowBlur = 0;
-                
-                if (ball.y >= bucketY && Math.abs(ball.x - finalX) < 2) {
-                    // Animation terminée - flash bucket
-                    let flashCount = 0;
-                    const bucketFlash = setInterval(() => {
-                        drawPlinkoBoard();
-                        
-                        if (flashCount % 2 === 0) {
-                            plinkoCtx.fillStyle = 'rgba(251, 191, 36, 0.4)';
-                            plinkoCtx.fillRect(finalPosition * bucketWidth, height - 60, bucketWidth, 50);
-                        }
-                        
-                        plinkoCtx.fillStyle = '#fbbf24';
-                        plinkoCtx.font = 'bold 28px Inter';
-                        plinkoCtx.textAlign = 'center';
-                        plinkoCtx.shadowColor = '#fbbf24';
-                        plinkoCtx.shadowBlur = 10;
-                        plinkoCtx.fillText(`${multiplier}x`, finalX, height - 28);
-                        plinkoCtx.shadowBlur = 0;
-                        
-                        flashCount++;
-                        if (flashCount >= 6) {
-                            clearInterval(bucketFlash);
+                    ball.x = startX + (finalX - startX) * easeProgress;
+                    ball.y = startY + (bucketY - startY) * easeProgress;
+                    
+                    drawPlinkoBoard();
+                    drawBall(ball.x, ball.y);
+                    
+                    if (step < steps) {
+                        requestAnimationFrame(moveToFinal);
+                    } else {
+                        // Flash du bucket
+                        let flashCount = 0;
+                        const flash = setInterval(() => {
                             drawPlinkoBoard();
-                            resolve();
-                        }
-                    }, 150);
-                    return;
-                }
+                            
+                            if (flashCount % 2 === 0) {
+                                plinkoCtx.fillStyle = 'rgba(251, 191, 36, 0.4)';
+                                plinkoCtx.fillRect(finalPosition * bucketWidth, height - 60, bucketWidth, 50);
+                            }
+                            
+                            plinkoCtx.fillStyle = '#fbbf24';
+                            plinkoCtx.font = 'bold 28px Inter';
+                            plinkoCtx.textAlign = 'center';
+                            plinkoCtx.shadowColor = '#fbbf24';
+                            plinkoCtx.shadowBlur = 10;
+                            plinkoCtx.fillText(`${multiplier}x`, finalX, height - 28);
+                            plinkoCtx.shadowBlur = 0;
+                            
+                            flashCount++;
+                            if (flashCount >= 6) {
+                                clearInterval(flash);
+                                drawPlinkoBoard();
+                                resolve();
+                            }
+                        }, 150);
+                    }
+                };
                 
-                requestAnimationFrame(animate);
+                moveToFinal();
                 return;
             }
             
-            // Calculer position du piquet cible
+            // Calculer position cible pour cette rangée
             const pegsInRow = currentRow + 3;
             const rowWidth = (maxWidth / rows) * (currentRow + 1);
             const spacing = Math.max(rowWidth / (pegsInRow - 1), minPegSpacing);
             const actualRowWidth = spacing * (pegsInRow - 1);
             const startX = (width - actualRowWidth) / 2;
             
-            targetPegIndex = path[currentRow];
-            const pegX = startX + spacing * targetPegIndex;
-            const pegY = startY + currentRow * rowSpacing;
-            const pegRadius = 5;
+            const pegIndex = path[currentRow];
+            const targetX = startX + spacing * pegIndex;
+            const targetY = startY + currentRow * rowSpacing;
             
-            // Appliquer la gravité
-            ball.vy += gravity;
-            ball.y += ball.vy;
-            ball.x += ball.vx;
+            // Animer vers le piquet
+            let step = 0;
+            const steps = 15;
+            const startBallX = ball.x;
+            const startBallY = ball.y;
             
-            // Friction de l'air
-            ball.vx *= friction;
-            
-            // Vérifier collision avec le piquet
-            const dx = ball.x - pegX;
-            const dy = ball.y - pegY;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            
-            if (distance < ballRadius + pegRadius && ball.y >= pegY - ballRadius) {
-                // Collision avec le piquet !
-                // Calculer angle de rebond
-                const angle = Math.atan2(dy, dx);
+            const moveToTarget = () => {
+                step++;
+                const progress = step / steps;
+                const easeProgress = 1 - Math.pow(1 - progress, 2);
                 
-                // Séparer la balle du piquet
-                const overlap = (ballRadius + pegRadius) - distance;
-                ball.x += Math.cos(angle) * overlap;
-                ball.y += Math.sin(angle) * overlap;
+                ball.x = startBallX + (targetX - startBallX) * easeProgress;
+                ball.y = startBallY + (targetY - startBallY) * easeProgress;
                 
-                // Appliquer rebond avec vélocité
-                const speed = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy) * restitution;
-                ball.vx = Math.cos(angle) * speed;
-                ball.vy = Math.sin(angle) * speed;
+                drawPlinkoBoard();
+                drawBall(ball.x, ball.y);
                 
-                // Ajouter une déviation aléatoire
-                ball.vx += (Math.random() - 0.5) * 2;
-                
-                currentRow++;
-            }
+                if (step < steps) {
+                    requestAnimationFrame(moveToTarget);
+                } else {
+                    currentRow++;
+                    setTimeout(animateToRow, 50);
+                }
+            };
             
-            drawPlinkoBoard();
-            
-            // Ball glow
-            const gradient = plinkoCtx.createRadialGradient(ball.x, ball.y, 0, ball.x, ball.y, ballRadius * 2);
-            gradient.addColorStop(0, 'rgba(251, 191, 36, 0.9)');
-            gradient.addColorStop(1, 'rgba(251, 191, 36, 0)');
-            plinkoCtx.fillStyle = gradient;
-            plinkoCtx.beginPath();
-            plinkoCtx.arc(ball.x, ball.y, ballRadius * 2, 0, Math.PI * 2);
-            plinkoCtx.fill();
-            
-            // Ball avec ombre
-            plinkoCtx.shadowColor = 'rgba(251, 191, 36, 0.8)';
-            plinkoCtx.shadowBlur = 15;
-            plinkoCtx.fillStyle = '#fbbf24';
-            plinkoCtx.beginPath();
-            plinkoCtx.arc(ball.x, ball.y, ballRadius, 0, Math.PI * 2);
-            plinkoCtx.fill();
-            plinkoCtx.shadowBlur = 0;
-            
-            requestAnimationFrame(animate);
+            moveToTarget();
         };
         
-        animate();
+        animateToRow();
     });
+}
+
+function drawBall(x, y) {
+    const ballRadius = 10;
+    
+    // Ball glow
+    const gradient = plinkoCtx.createRadialGradient(x, y, 0, x, y, ballRadius * 2);
+    gradient.addColorStop(0, 'rgba(251, 191, 36, 0.9)');
+    gradient.addColorStop(1, 'rgba(251, 191, 36, 0)');
+    plinkoCtx.fillStyle = gradient;
+    plinkoCtx.beginPath();
+    plinkoCtx.arc(x, y, ballRadius * 2, 0, Math.PI * 2);
+    plinkoCtx.fill();
+    
+    // Ball avec ombre
+    plinkoCtx.shadowColor = 'rgba(251, 191, 36, 0.8)';
+    plinkoCtx.shadowBlur = 15;
+    plinkoCtx.fillStyle = '#fbbf24';
+    plinkoCtx.beginPath();
+    plinkoCtx.arc(x, y, ballRadius, 0, Math.PI * 2);
+    plinkoCtx.fill();
+    plinkoCtx.shadowBlur = 0;
 }
