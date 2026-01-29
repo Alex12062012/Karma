@@ -207,8 +207,10 @@ async function animateRouletteWheel(finalNumber) {
         const targetIndex = numbers.indexOf(finalNumber);
         const segmentAngle = (Math.PI * 2) / numbers.length;
         
-        const totalRotations = 5;
-        const targetRotation = (totalRotations * Math.PI * 2) + (targetIndex * segmentAngle);
+        // Calculer la rotation pour que le numéro soit en haut (sous la flèche)
+        // La flèche pointe vers le haut (rotation 0), donc on doit ajuster
+        const totalRotations = 5; // Nombre de tours complets
+        const targetRotation = (totalRotations * Math.PI * 2) - (targetIndex * segmentAngle) + (Math.PI / 2);
         
         let currentRotation = 0;
         const duration = 3000;
@@ -218,7 +220,7 @@ async function animateRouletteWheel(finalNumber) {
             const elapsed = Date.now() - startTime;
             const progress = Math.min(elapsed / duration, 1);
             
-            // Ease out
+            // Ease out cubic pour ralentissement progressif
             const easeProgress = 1 - Math.pow(1 - progress, 3);
             currentRotation = targetRotation * easeProgress;
             
@@ -227,7 +229,9 @@ async function animateRouletteWheel(finalNumber) {
             if (progress < 1) {
                 requestAnimationFrame(animate);
             } else {
-                resolve();
+                // S'assurer que la roue est exactement à la bonne position
+                drawRouletteWheel(targetRotation);
+                setTimeout(resolve, 300);
             }
         };
         
