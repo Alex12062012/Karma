@@ -438,5 +438,367 @@ def play_mines():
             'balance': user.balance
         })
 
+# Game: Pump
+@app.route('/api/play/pump', methods=['POST'])
+def play_pump():
+    user = get_current_user()
+    if not user:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    data = request.json
+    action = data['action']
+    
+    if action == 'start':
+        bet_amount = float(data['bet'])
+        
+        if user.balance < bet_amount:
+            return jsonify({'error': 'Insufficient balance'}), 400
+        
+        # Generate random max multiplier (pop point)
+        max_mult = round(1.0 + random.expovariate(0.5), 2)
+        max_mult = min(max_mult, 50.0)
+        
+        session['pump_game'] = {
+            'bet': bet_amount,
+            'max_multiplier': max_mult
+        }
+        
+        user.balance -= bet_amount
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'maxMultiplier': max_mult,
+            'balance': user.balance
+        })
+    
+    elif action == 'pop':
+        if 'pump_game' not in session:
+            return jsonify({'error': 'No active game'}), 400
+        
+        game = session['pump_game']
+        
+        transaction = Transaction(
+            user_id=user.id,
+            game='pump',
+            bet_amount=game['bet'],
+            win_amount=0,
+            multiplier=0
+        )
+        
+        db.session.add(transaction)
+        db.session.commit()
+        
+        del session['pump_game']
+        
+        return jsonify({'balance': user.balance})
+    
+    elif action == 'cashout':
+        if 'pump_game' not in session:
+            return jsonify({'error': 'No active game'}), 400
+        
+        game = session['pump_game']
+        multiplier = float(data['multiplier'])
+        win_amount = game['bet'] * multiplier
+        
+        user.balance += win_amount
+        
+        transaction = Transaction(
+            user_id=user.id,
+            game='pump',
+            bet_amount=game['bet'],
+            win_amount=win_amount,
+            multiplier=multiplier
+        )
+        
+        db.session.add(transaction)
+        db.session.commit()
+        
+        del session['pump_game']
+        
+        return jsonify({
+            'win': win_amount,
+            'multiplier': multiplier,
+            'balance': user.balance
+        })
+
+# Game: Limbo
+@app.route('/api/play/limbo', methods=['POST'])
+def play_limbo():
+    user = get_current_user()
+    if not user:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    data = request.json
+    bet_amount = float(data['bet'])
+    target = float(data['target'])
+    
+    if user.balance < bet_amount:
+        return jsonify({'error': 'Insufficient balance'}), 400
+    
+    # Generate result
+    result = round(random.uniform(0.01, 100), 2)
+    
+    won = result >= target
+    
+    if won:
+        multiplier = target
+        win_amount = bet_amount * multiplier
+    else:
+        multiplier = 0
+        win_amount = 0
+    
+    user.balance -= bet_amount
+    user.balance += win_amount
+    
+    transaction = Transaction(
+        user_id=user.id,
+        game='limbo',
+        bet_amount=bet_amount,
+        win_amount=win_amount,
+        multiplier=multiplier
+    )
+    
+    db.session.add(transaction)
+    db.session.commit()
+    
+    return jsonify({
+        'result': result,
+        'won': won,
+        'multiplier': multiplier,
+        'win': win_amount,
+        'balance': user.balance
+    })
+
+# Game: Roulette
+@app.route('/api/play/roulette', methods=['POST'])
+def play_roulette():
+    user = get_current_user()
+    if not user:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    data = request.json
+    bet_amount = float(data['bet'])
+    bet_type = data['betType']
+    
+    if user.balance < bet_amount:
+        return jsonify({'error': 'Insufficient balance'}), 400
+    
+    # Roulette numbers
+    red_numbers = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]
+    black_numbers = [2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35]
+    
+    # Spin wheel
+    number = random.randint(0, 36)
+    
+    won = False
+    
+    if bet_type == 'red' and number in red_numbers:
+        won = True
+    elif bet_type == 'black' and number in black_numbers:
+        won = True
+    elif bet_type == 'even' and number > 0 and number % 2 == 0:
+        won = True
+    elif bet_type == 'odd' and number % 2 == 1:
+        won = True
+    elif bet_type == 'low' and 1 <= number <= 18:
+        won = True
+    elif bet_type == 'high' and 19 <= number <= 36:
+        won = True
+    
+    if won:
+        multiplier = 2.0
+        win_amount = bet_amount * multiplier
+    else:
+        multiplier = 0
+        win_amount = 0
+    
+    user.balance -= bet_amount
+    user.balance += win_amount
+    
+    transaction = Transaction(
+        user_id=user.id,
+        game='roulette',
+        bet_amount=bet_amount,
+        win_amount=win_amount,
+        multiplier=multiplier
+    )
+    
+    db.session.add(transaction)
+    db.session.commit()
+    
+    return jsonify({
+        'number': number,
+        'won': won,
+        'multiplier': multiplier,
+        'win': win_amount,
+        'balance': user.balance
+    })
+
+# Game: BlackJack
+@app.route('/api/play/blackjack', methods=['POST'])
+def play_blackjack():
+    user = get_current_user()
+    if not user:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    data = request.json
+    action = data['action']
+    
+    if action == 'deal':
+        bet_amount = float(data['bet'])
+        
+        if user.balance < bet_amount:
+            return jsonify({'error': 'Insufficient balance'}), 400
+        
+        # Create deck
+        suits = ['♠', '♥', '♦', '♣']
+        ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K']
+        deck = [f"{rank}{suit}" for suit in suits for rank in ranks]
+        random.shuffle(deck)
+        
+        # Deal cards
+        player_hand = [deck.pop(), deck.pop()]
+        dealer_hand = [deck.pop(), deck.pop()]
+        
+        session['blackjack_game'] = {
+            'bet': bet_amount,
+            'deck': deck,
+            'player_hand': player_hand,
+            'dealer_hand': dealer_hand
+        }
+        
+        user.balance -= bet_amount
+        db.session.commit()
+        
+        player_score = calculate_blackjack_score(player_hand)
+        dealer_score = calculate_blackjack_score([dealer_hand[0]])
+        
+        return jsonify({
+            'playerHand': player_hand,
+            'dealerHand': dealer_hand,
+            'playerScore': player_score,
+            'dealerScore': dealer_score,
+            'balance': user.balance
+        })
+    
+    elif action == 'hit':
+        if 'blackjack_game' not in session:
+            return jsonify({'error': 'No active game'}), 400
+        
+        game = session['blackjack_game']
+        game['player_hand'].append(game['deck'].pop())
+        session['blackjack_game'] = game
+        
+        player_score = calculate_blackjack_score(game['player_hand'])
+        dealer_score = calculate_blackjack_score([game['dealer_hand'][0]])
+        
+        game_over = player_score > 21
+        
+        result_data = {
+            'playerHand': game['player_hand'],
+            'dealerHand': game['dealer_hand'],
+            'playerScore': player_score,
+            'dealerScore': dealer_score,
+            'gameOver': game_over
+        }
+        
+        if game_over:
+            # Player busts
+            transaction = Transaction(
+                user_id=user.id,
+                game='blackjack',
+                bet_amount=game['bet'],
+                win_amount=0,
+                multiplier=0
+            )
+            
+            db.session.add(transaction)
+            db.session.commit()
+            
+            del session['blackjack_game']
+            
+            result_data['result'] = 'lose'
+            result_data['win'] = 0
+            result_data['balance'] = user.balance
+        
+        return jsonify(result_data)
+    
+    elif action == 'stand':
+        if 'blackjack_game' not in session:
+            return jsonify({'error': 'No active game'}), 400
+        
+        game = session['blackjack_game']
+        
+        # Dealer plays
+        while calculate_blackjack_score(game['dealer_hand']) < 17:
+            game['dealer_hand'].append(game['deck'].pop())
+        
+        player_score = calculate_blackjack_score(game['player_hand'])
+        dealer_score = calculate_blackjack_score(game['dealer_hand'])
+        
+        # Determine winner
+        if dealer_score > 21:
+            result = 'win'
+            multiplier = 2.0
+        elif player_score > dealer_score:
+            result = 'win'
+            multiplier = 2.0
+        elif player_score < dealer_score:
+            result = 'lose'
+            multiplier = 0
+        else:
+            result = 'push'
+            multiplier = 1.0
+        
+        win_amount = game['bet'] * multiplier
+        user.balance += win_amount
+        
+        transaction = Transaction(
+            user_id=user.id,
+            game='blackjack',
+            bet_amount=game['bet'],
+            win_amount=win_amount,
+            multiplier=multiplier
+        )
+        
+        db.session.add(transaction)
+        db.session.commit()
+        
+        del session['blackjack_game']
+        
+        return jsonify({
+            'playerHand': game['player_hand'],
+            'dealerHand': game['dealer_hand'],
+            'playerScore': player_score,
+            'dealerScore': dealer_score,
+            'result': result,
+            'win': win_amount,
+            'multiplier': multiplier,
+            'balance': user.balance,
+            'gameOver': True
+        })
+
+def calculate_blackjack_score(hand):
+    score = 0
+    aces = 0
+    
+    for card in hand:
+        rank = card[:-1]
+        if rank in ['J', 'Q', 'K']:
+            score += 10
+        elif rank == 'A':
+            aces += 1
+            score += 11
+        else:
+            score += int(rank)
+    
+    # Adjust for aces
+    while score > 21 and aces > 0:
+        score -= 10
+        aces -= 1
+    
+    return score
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=False)
