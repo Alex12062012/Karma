@@ -536,8 +536,25 @@ def play_limbo():
     if user.balance < bet_amount:
         return jsonify({'error': 'Insufficient balance'}), 400
     
-    # Generate result
-    result = round(random.uniform(0.01, 100), 2)
+    # Generate result with weighted probability (harder for high multipliers)
+    # Use exponential distribution for realistic casino odds
+    rand_value = random.random()
+    
+    # Transform to make high values rare
+    if rand_value < 0.5:
+        # 50% chance of 1-2x
+        result = round(1.0 + rand_value * 2, 2)
+    elif rand_value < 0.8:
+        # 30% chance of 2-5x
+        result = round(2.0 + (rand_value - 0.5) * 10, 2)
+    elif rand_value < 0.95:
+        # 15% chance of 5-20x
+        result = round(5.0 + (rand_value - 0.8) * 100, 2)
+    else:
+        # 5% chance of 20-100x
+        result = round(20.0 + (rand_value - 0.95) * 1600, 2)
+    
+    result = min(result, 100.0)  # Cap at 100x
     
     won = result >= target
     
