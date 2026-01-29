@@ -49,7 +49,7 @@
         .orb-1 {
             width: 500px;
             height: 500px;
-            background: linear-gradient(135deg, #9333EA, #EC4899);
+            background: linear-gradient(135deg, #00D9A3, #0EA5E9);
             top: -200px;
             left: -200px;
             animation-delay: 0s;
@@ -58,7 +58,7 @@
         .orb-2 {
             width: 600px;
             height: 600px;
-            background: linear-gradient(135deg, #EC4899, #F59E0B);
+            background: linear-gradient(135deg, #3B82F6, #00D9A3);
             bottom: -300px;
             right: -300px;
             animation-delay: 5s;
@@ -67,7 +67,7 @@
         .orb-3 {
             width: 400px;
             height: 400px;
-            background: linear-gradient(135deg, #F59E0B, #9333EA);
+            background: linear-gradient(135deg, #0EA5E9, #00B386);
             top: 50%;
             left: 50%;
             animation-delay: 10s;
@@ -94,7 +94,7 @@
         .logo-big svg {
             width: 120px;
             height: 120px;
-            filter: drop-shadow(0 20px 40px rgba(147, 51, 234, 0.5));
+            filter: drop-shadow(0 20px 40px rgba(0, 217, 163, 0.5));
         }
 
         @keyframes fadeInDown {
@@ -111,7 +111,7 @@
         h1 {
             font-size: 72px;
             font-weight: 900;
-            background: linear-gradient(135deg, #9333EA, #EC4899, #F59E0B);
+            background: linear-gradient(135deg, #00D9A3, #3B82F6, #0EA5E9);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -157,14 +157,14 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #9333EA, #EC4899);
+            background: linear-gradient(135deg, #00D9A3, #3B82F6);
             color: white;
-            box-shadow: 0 10px 30px rgba(147, 51, 234, 0.4);
+            box-shadow: 0 10px 30px rgba(0, 217, 163, 0.4);
         }
 
         .btn-primary:hover {
             transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(147, 51, 234, 0.6);
+            box-shadow: 0 15px 40px rgba(0, 217, 163, 0.6);
         }
 
         .btn-secondary {
@@ -203,7 +203,7 @@
         .feature:hover {
             transform: translateY(-5px);
             background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(147, 51, 234, 0.5);
+            border-color: rgba(0, 217, 163, 0.5);
         }
 
         .feature-icon {
@@ -214,7 +214,7 @@
         .feature h3 {
             font-size: 20px;
             margin-bottom: 10px;
-            background: linear-gradient(135deg, #9333EA, #EC4899);
+            background: linear-gradient(135deg, #00D9A3, #3B82F6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -243,7 +243,7 @@
         .stat-number {
             font-size: 48px;
             font-weight: 900;
-            background: linear-gradient(135deg, #9333EA, #EC4899, #F59E0B);
+            background: linear-gradient(135deg, #00D9A3, #3B82F6, #0EA5E9);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -283,17 +283,13 @@
         <div class="content">
             <div class="logo-big">
                 <svg width="120" height="120" viewBox="0 0 40 40" fill="none">
-                    <circle cx="20" cy="20" r="18" fill="url(#karma-gradient-home)" opacity="0.2"/>
-                    <path d="M20 4C20 4 12 12 12 20C12 24 14 28 20 28C26 28 28 24 28 20C28 12 20 4 20 4Z" fill="url(#karma-gradient-home)"/>
-                    <circle cx="20" cy="16" r="3" fill="white"/>
-                    <path d="M16 22C16 22 18 24 20 24C22 24 24 22 24 22" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                    <defs>
-                        <linearGradient id="karma-gradient-home" x1="20" y1="4" x2="20" y2="36" gradientUnits="userSpaceOnUse">
-                            <stop stop-color="#9333EA"/>
-                            <stop offset="0.5" stop-color="#EC4899"/>
-                            <stop offset="1" stop-color="#F59E0B"/>
-                        </linearGradient>
-                    </defs>
+                    <g>
+                        <!-- Puzzle pieces with rounded corners -->
+                        <path d="M20 2 L20 12 Q20 15 17 15 L7 15 L7 5 Q7 2 10 2 Z" fill="#00D9A3" rx="3"/>
+                        <path d="M20 2 L30 2 Q33 2 33 5 L33 15 L23 15 Q20 15 20 12 Z" fill="#3B82F6" rx="3"/>
+                        <path d="M7 15 L17 15 Q20 15 20 18 L20 28 L10 28 Q7 28 7 25 Z" fill="#3B82F6" rx="3"/>
+                        <path d="M20 28 L20 38 Q20 38 23 38 L33 38 L33 28 Q33 25 30 25 L23 25 Q20 25 20 28 Z" fill="#00D9A3" rx="3"/>
+                    </g>
                 </svg>
             </div>
 
