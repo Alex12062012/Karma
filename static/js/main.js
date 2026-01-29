@@ -129,10 +129,6 @@ function loadGame(game) {
             container.innerHTML = getMinesHTML();
             initMines();
             break;
-        case 'chicken':
-            container.innerHTML = getChickenHTML();
-            initChicken();
-            break;
         case 'pump':
             container.innerHTML = getPumpHTML();
             initPump();
